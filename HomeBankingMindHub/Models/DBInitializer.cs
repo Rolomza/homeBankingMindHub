@@ -16,7 +16,6 @@
                 };
 
                 context.Clients.AddRange(clients);
-
                 //guardamos
                 context.SaveChanges();
             }
