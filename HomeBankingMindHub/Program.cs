@@ -14,7 +14,7 @@ builder.Services.AddDbContext<HomeBankingContext>(options =>
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(x =>
-    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
 var app = builder.Build();
