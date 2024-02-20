@@ -40,6 +40,15 @@ namespace HomeBankingMindHub.Controllers
                                 Balance = account.Balance,
                                 CreationDate = account.CreationDate,
                                 Number = account.Number
+                            }).ToList(),
+                        Loans = client.ClientLoans.Select(client =>
+                            new ClientLoanDTO
+                            {
+                                Id = client.Id,
+                                LoanId = client.LoanId,
+                                Name = client.Loan.Name,
+                                Amount = client.Amount,
+                                Payments = int.Parse(client.Payments)
                             }).ToList()
                     };
 
@@ -77,7 +86,16 @@ namespace HomeBankingMindHub.Controllers
                         Balance = account.Balance,
                         CreationDate = account.CreationDate,
                         Number = account.Number
-                    }).ToList()
+                    }).ToList(),
+                    Loans = client.ClientLoans.Select(client =>
+                        new ClientLoanDTO
+                        {
+                            Id = client.Id,
+                            LoanId = client.LoanId,
+                            Name = client.Loan.Name,
+                            Amount = client.Amount,
+                            Payments = int.Parse(client.Payments)
+                        }).ToList()
                 };
 
                 return Ok(clientDTO);
