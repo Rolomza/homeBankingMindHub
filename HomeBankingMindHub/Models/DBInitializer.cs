@@ -102,6 +102,71 @@
                     context.SaveChanges();
                 }
             }
+
+            if (!context.Loans.Any())
+            {
+                // Creacion de 3 prestamos.
+                var loans = new Loan[]
+                {
+                    new Loan {Name = "Hipotecario", MaxAmount = 500_000, Payments = "12,24,36,48,60"},
+                    new Loan {Name = "Personal", MaxAmount = 100_000, Payments = "6,12,24"},
+                    new Loan {Name = "Automotriz", MaxAmount = 300_000, Payments = "6,12,24,36"}
+                };
+
+                foreach (Loan loan in loans)
+                {
+                    context.Loans.Add(loan);
+                }
+
+                context.SaveChanges();
+
+                // Agregamos los ClientLoans (Prestamos del cliente)
+                var client1 = context.Clients.FirstOrDefault(client => client.Email == "vcoronado@gmail.com");
+                if (client1 != null)
+                {
+                    var loan1 = context.Loans.FirstOrDefault(loan => loan.Name == "Hipotecario");
+                    if (loan1 != null)
+                    {
+                        var clientLoan1 = new ClientLoan
+                        {
+                            Amount = 400_000,
+                            ClientId = client1.Id,
+                            LoanId = loan1.Id,
+                            Payments = "60"
+                        };
+                        context.ClientLoans.Add(clientLoan1);
+                    }
+
+                    var loan2 = context.Loans.FirstOrDefault(loan => loan.Name == "Personal");
+                    if (loan2 != null)
+                    {
+                        var clientLoan2 = new ClientLoan
+                        {
+                            Amount = 50_000,
+                            ClientId = client1.Id,
+                            LoanId = loan2.Id,
+                            Payments = "12"
+                        };
+                        context.ClientLoans.Add(clientLoan2);
+                    }
+
+                    var loan3 = context.Loans.FirstOrDefault(loan => loan.Name == "Automotriz");
+                    if (loan3 != null)
+                    {
+                        var clientLoan3 = new ClientLoan
+                        {
+                            Amount = 100_000,
+                            ClientId = client1.Id,
+                            LoanId = loan3.Id,
+                            Payments = "24"
+                        };
+                        context.ClientLoans.Add(clientLoan3);
+                    }
+
+                    // Guardamos todos los cambios
+                    context.SaveChanges();
+                }
+            }
         }
     }
 }
