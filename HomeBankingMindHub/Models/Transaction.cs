@@ -1,4 +1,6 @@
-﻿namespace HomeBankingMindHub.Models
+﻿using HomeBankingMindHub.Models.Enums;
+
+namespace HomeBankingMindHub.Models
 {
     public class Transaction
     {

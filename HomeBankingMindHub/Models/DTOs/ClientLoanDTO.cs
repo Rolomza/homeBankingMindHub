@@ -1,4 +1,4 @@
-﻿namespace HomeBankingMindHub.Models
+﻿namespace HomeBankingMindHub.Models.DTOs
 {
     public class ClientLoanDTO
     {
@@ -7,6 +7,6 @@
         public string Name { get; set; }
         public double Amount { get; set; }
         public int Payments { get; set; }
-        
+
     }
 }
