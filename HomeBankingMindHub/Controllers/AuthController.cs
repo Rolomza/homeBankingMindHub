@@ -52,5 +52,20 @@ namespace HomeBankingMindHub.Controllers
             }
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                await HttpContext.SignOutAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 }
