@@ -130,5 +130,64 @@ namespace HomeBankingMindHub.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("current")]
+        public IActionResult GetCurrent()
+        {
+            try
+            {
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Forbid();
+                }
+
+                Client client = _clientRepository.FindByEmail(email);
+                if (client == null)
+                {
+                    return Forbid();
+                }
+
+                var clientDTO = new ClientDTO
+                {
+                    Id = client.Id,
+                    Email = client.Email,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Accounts = client.Accounts.Select(account => new AccountDTO
+                    {
+                        Id = account.Id,
+                        Balance = account.Balance,
+                        CreationDate = account.CreationDate,
+                        Number = account.Number,
+                    }).ToList(),
+                    Credits = client.ClientLoans.Select(client => new ClientLoanDTO
+                    {
+                        Id = client.Id,
+                        LoanId = client.LoanId,
+                        Name = client.Loan.Name,
+                        Amount = client.Amount,
+                        Payments = int.Parse(client.Payments)
+                    }).ToList(),
+                    Cards = client.Cards.Select(card => new CardDTO
+                    {
+                        Id = card.Id,
+                        CardHolder = card.CardHolder,
+                        Color = card.Color.ToString(),
+                        Cvv = card.Cvv,
+                        FromDate = card.FromDate,
+                        Number = card.Number,
+                        ThruDate = card.ThruDate,
+                        Type = card.Type.ToString()
+                    }).ToList()
+                };
+
+                return Ok(clientDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

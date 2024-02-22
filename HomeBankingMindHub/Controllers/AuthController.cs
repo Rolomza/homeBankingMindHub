@@ -30,16 +30,19 @@ namespace HomeBankingMindHub.Controllers
                     return Unauthorized();
                 }
 
+                // Creación de claims (Datos del usuario a autenticar)
                 var claims = new List<Claim>
                 {
                     new Claim("Client", user.Email),
                 };
 
+                // Creación del objeto que contendrá la info del usuario y el metodo de autenticacion.
                 var claimsIdentity = new ClaimsIdentity(
                     claims,
                     CookieAuthenticationDefaults.AuthenticationScheme
                     );
 
+                // Autenticar al usuario en la app
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity));
