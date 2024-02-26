@@ -3,6 +3,7 @@ using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace HomeBankingMindHub.Controllers
 {
@@ -62,18 +63,21 @@ namespace HomeBankingMindHub.Controllers
             try
             {
                 var account = _accountRepository.FindById(id);
-                
+
                 if (account == null)
                 {
                     return Forbid();
                 }
 
                 string email = account.Client.Email;
-                var userAuthenticatedEmail = User.FindFirst("Client").Value;
-
-                if (userAuthenticatedEmail != email)
+                if (User.FindFirst("Admin") == null)
                 {
-                    return Forbid();
+                    var userAuthenticatedEmail = User.FindFirst("Client").Value;
+
+                    if (userAuthenticatedEmail != email)
+                    {
+                        return Unauthorized();
+                    }
                 }
 
                 var accountDTO = new AccountDTO

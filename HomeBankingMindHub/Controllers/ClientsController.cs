@@ -89,6 +89,17 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
+                string email = client.Email;
+                if (User.FindFirst("Admin") == null)
+                {
+                    var userAuthenticatedEmail = User.FindFirst("Client").Value;
+
+                    if (userAuthenticatedEmail != email)
+                    {
+                        return Unauthorized();
+                    }
+                }
+
                 var clientDTO = new ClientDTO
                 {
                     Id = client.Id,
@@ -134,6 +145,7 @@ namespace HomeBankingMindHub.Controllers
         }
 
         [HttpGet("current")]
+        [Authorize("ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
