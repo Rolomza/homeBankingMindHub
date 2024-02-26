@@ -31,10 +31,14 @@ namespace HomeBankingMindHub.Controllers
                 }
 
                 // Creación de claims (Datos del usuario a autenticar)
-                var claims = new List<Claim>
+                var claims = new List<Claim>();
+                if (user.Email.Equals("admin@gmail.com"))
                 {
-                    new Claim("Client", user.Email),
-                };
+                    claims.Add(new Claim("Admin", user.Email));
+                } else
+                {
+                    claims.Add(new Claim("Client", user.Email));
+                }
 
                 // Creación del objeto que contendrá la info del usuario y el metodo de autenticacion.
                 var claimsIdentity = new ClaimsIdentity(

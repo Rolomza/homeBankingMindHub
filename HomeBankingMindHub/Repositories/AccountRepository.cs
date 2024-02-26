@@ -13,6 +13,7 @@ namespace HomeBankingMindHub.Repositories
         {
             return FindByCondition(account => account.Id == id)
                 .Include(account => account.Transactions)
+                .Include(account => account.Client)
                 .FirstOrDefault();
         }
 

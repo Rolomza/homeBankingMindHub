@@ -1,6 +1,7 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -132,6 +133,7 @@ namespace HomeBankingMindHub.Controllers
         }
 
         [HttpGet("current")]
+        [Authorize("ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
