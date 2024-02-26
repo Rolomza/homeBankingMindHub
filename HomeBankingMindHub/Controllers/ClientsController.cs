@@ -20,6 +20,7 @@ namespace HomeBankingMindHub.Controllers
         }
 
         [HttpGet]
+        [Authorize("AdminOnly")]
         public IActionResult Get()
         {
             try
@@ -133,7 +134,6 @@ namespace HomeBankingMindHub.Controllers
         }
 
         [HttpGet("current")]
-        [Authorize("ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
@@ -185,6 +185,51 @@ namespace HomeBankingMindHub.Controllers
                 };
 
                 return Ok(clientDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] ClientCreationDTO clientCreationDTO)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(clientCreationDTO.Email))
+                {
+                    return StatusCode(403, "Email inválido.");
+                }
+
+                if (String.IsNullOrEmpty(clientCreationDTO.Password))
+                {
+                    return StatusCode(403, "Password inválido.");
+                }
+
+                if (String.IsNullOrEmpty(clientCreationDTO.FirstName) || String.IsNullOrEmpty(clientCreationDTO.LastName))
+                {
+                    return StatusCode(403, "Datos Personales Incompletos.");
+                }
+
+                Client user = _clientRepository.FindByEmail(clientCreationDTO.Email);
+
+                if (user != null) 
+                {
+                    return StatusCode(403, "Email está en uso.");
+                }
+
+                Client newClient = new Client
+                {
+                    Email = clientCreationDTO.Email,
+                    Password = clientCreationDTO.Password,
+                    FirstName = clientCreationDTO.FirstName,
+                    LastName = clientCreationDTO.LastName,
+                };
+
+                _clientRepository.Save(newClient);
+                return Created("", newClient);
+
             }
             catch (Exception ex)
             {
