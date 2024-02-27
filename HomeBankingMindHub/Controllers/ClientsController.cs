@@ -269,6 +269,18 @@ namespace HomeBankingMindHub.Controllers
                 } else
                 {
                     Console.WriteLine($"Hola {client.FirstName} Puedes crear otra cuenta.");
+
+                    // Creacion de la cuenta nueva
+                    Account newAccount = new Account
+                    {
+                        ClientId = client.Id,
+                        CreationDate = DateTime.Now,
+                        Balance = 0,
+                        // Creacion aleatoria del numero
+                        //Number = 
+                    };
+
+                    // Guardar la cuenta
                 }
 
 

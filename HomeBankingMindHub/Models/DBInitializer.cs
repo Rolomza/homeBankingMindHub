@@ -55,21 +55,21 @@ namespace HomeBankingMindHub.Models
                         {
                             ClientId = accountVictor.Id,
                             CreationDate = DateTime.Now,
-                            Number = "VIN001",
+                            Number = "VIN-00000001",
                             Balance = 0
                         },
                         new Account
                         {
                             ClientId = accountMarcos.Id,
                             CreationDate = new DateTime(2022, 5, 10, 14, 9, 55),
-                            Number = "VIN002",
+                            Number = "VIN-00000002",
                             Balance = 50000
                         },
                         new Account
                         {
                             ClientId = accountLiliana.Id,
                             CreationDate = new DateTime(2023, 7, 16, 11, 10, 32),
-                            Number = "VIN003",
+                            Number = "VIN-00000003",
                             Balance = 25000
                         }
                     };
