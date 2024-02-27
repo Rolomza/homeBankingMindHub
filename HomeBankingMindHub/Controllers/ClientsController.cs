@@ -226,7 +226,7 @@ namespace HomeBankingMindHub.Controllers
 
                 Client user = _clientRepository.FindByEmail(clientCreationDTO.Email);
 
-                if (user != null) 
+                if (user != null)
                 {
                     return StatusCode(403, "Email está en uso.");
                 }
@@ -242,6 +242,37 @@ namespace HomeBankingMindHub.Controllers
                 _clientRepository.Save(newClient);
                 return Created("", newClient);
 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("current/accounts")]
+        [Authorize("ClientOnly")]
+        public IActionResult Post()
+        {
+            try
+            {
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Forbid();
+                }
+
+                var client = _clientRepository.FindByEmail(email);
+                
+                if (client.Accounts.ToList().Count == 3)
+                {
+                    return StatusCode(403, "Has Alcanzado la cantidad maxima de cuentas por cliente (3).");
+                } else
+                {
+                    Console.WriteLine($"Hola {client.FirstName} Puedes crear otra cuenta.");
+                }
+
+
+                return StatusCode(201, "Cuenta Creada satisfactoriamente.");
             }
             catch (Exception ex)
             {
