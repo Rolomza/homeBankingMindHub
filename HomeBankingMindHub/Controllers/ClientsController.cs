@@ -1,6 +1,7 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace HomeBankingMindHub.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly IClientRepository _clientRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public ClientsController(IClientRepository clientRepository)
+        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository)
         {
             _clientRepository = clientRepository;
+            _accountRepository = accountRepository;
         }
 
         [HttpGet]
@@ -266,21 +269,25 @@ namespace HomeBankingMindHub.Controllers
                 if (client.Accounts.ToList().Count == 3)
                 {
                     return StatusCode(403, "Has Alcanzado la cantidad maxima de cuentas por cliente (3).");
-                } else
+                } 
+                else
                 {
-                    Console.WriteLine($"Hola {client.FirstName} Puedes crear otra cuenta.");
+                    var accounts = _accountRepository.GetAllAccounts();
+                    string newAccountNumber;
+                    do
+                    {
+                        newAccountNumber = RandomNumberGenerator.GenerateAccountNumber();
+                    } while (accounts.Any(account => account.Number == newAccountNumber));
 
-                    // Creacion de la cuenta nueva
                     Account newAccount = new Account
                     {
                         ClientId = client.Id,
                         CreationDate = DateTime.Now,
                         Balance = 0,
-                        // Creacion aleatoria del numero
-                        //Number = 
+                        Number = newAccountNumber,
                     };
 
-                    // Guardar la cuenta
+                    _accountRepository.Save(newAccount);
                 }
 
 
