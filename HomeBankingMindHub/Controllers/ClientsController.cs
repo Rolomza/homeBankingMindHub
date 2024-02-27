@@ -272,12 +272,11 @@ namespace HomeBankingMindHub.Controllers
                 } 
                 else
                 {
-                    var accounts = _accountRepository.GetAllAccounts();
                     string newAccountNumber;
                     do
                     {
                         newAccountNumber = RandomNumberGenerator.GenerateAccountNumber();
-                    } while (accounts.Any(account => account.Number == newAccountNumber));
+                    } while (_accountRepository.FindByNumber(newAccountNumber) != null);
 
                     Account newAccount = new Account
                     {
@@ -289,7 +288,6 @@ namespace HomeBankingMindHub.Controllers
 
                     _accountRepository.Save(newAccount);
                 }
-
 
                 return StatusCode(201, "Cuenta Creada satisfactoriamente.");
             }

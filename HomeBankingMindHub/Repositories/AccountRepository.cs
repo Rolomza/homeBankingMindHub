@@ -31,10 +31,18 @@ namespace HomeBankingMindHub.Repositories
                 .ToList();
         }
 
+
         public void Save(Account account)
         {
             Create(account);
             SaveChanges();
+        }
+
+        public Account FindByNumber(string number)
+        {
+            return FindByCondition(account => account.Number == number)
+                .Include(account => account.Transactions)
+                .FirstOrDefault();
         }
     }
 }
