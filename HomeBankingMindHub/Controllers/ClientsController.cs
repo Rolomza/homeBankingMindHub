@@ -1,10 +1,12 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
+using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
 using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 
 namespace HomeBankingMindHub.Controllers
 {
@@ -290,6 +292,64 @@ namespace HomeBankingMindHub.Controllers
                 }
 
                 return StatusCode(201, "Cuenta Creada satisfactoriamente.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("current/cards")]
+        [Authorize("ClientOnly")]
+        public IActionResult Post([FromBody] CardCreationDTO cardCreationDTO)
+        {
+            try
+            {
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Forbid();
+                }
+
+                var client = _clientRepository.FindByEmail(email);
+                var cardCreationDTOType = (CardType)Enum.Parse(typeof(CardType), cardCreationDTO.Type);
+                var cardCreationDTOColor = (CardColor)Enum.Parse(typeof(CardColor), cardCreationDTO.Color);
+
+                if (client.Cards.Count(card => card.Type == cardCreationDTOType) == 3)
+                {
+                    return StatusCode(403, $"Cantidad máxima de Tarjetas tipo {cardCreationDTO.Type} por cliente (3).");
+                } 
+                else
+                {
+                    if (client.Cards.Where(card => card.Type == cardCreationDTOType).Any(card => card.Color == cardCreationDTOColor))
+                    {
+                        return StatusCode(403, $"Ya posee tarjeta tipo {cardCreationDTO.Type} de color {cardCreationDTO.Color}");
+                    }
+                }
+
+                string newCardNumber;
+                newCardNumber = RandomNumberGenerator.GenerateCardNumber();
+
+                do
+                {
+                    newCardNumber = RandomNumberGenerator.GenerateCardNumber();
+                } while (client.Cards.Any(card => card.Number == newCardNumber));
+
+                Card newCard = new Card
+                {
+                    ClientId = client.Id,
+                    CardHolder = client.FirstName + " " + client.LastName,
+                    Type = cardCreationDTOType,
+                    Color = cardCreationDTOColor,
+                    Number = newCardNumber,
+                    Cvv = RandomNumberGenerator.GenerateCvvNumber(),
+                    FromDate = DateTime.Now,
+                    ThruDate = DateTime.Now.AddYears(5),
+                };
+
+
+
+                return StatusCode(201, $"Tarjeta Creada satisfactoriamente.");
             }
             catch (Exception ex)
             {
