@@ -1,4 +1,6 @@
-﻿using HomeBankingMindHub.Models.DTOs;
+﻿using HomeBankingMindHub.Models;
+using HomeBankingMindHub.Models.DTOs;
+using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -60,8 +62,8 @@ namespace HomeBankingMindHub.Controllers
                 }
 
                 // Verificar que exista la cuenta de destino
-                var ToAccount = _accountRepository.FindByNumber(newTransfer.ToAccountNumber);
-                if (ToAccount == null)
+                var toAccount = _accountRepository.FindByNumber(newTransfer.ToAccountNumber);
+                if (toAccount == null)
                 {
                     return BadRequest($"La cuenta de destino {newTransfer.ToAccountNumber} no existe.");
                 }
@@ -74,9 +76,34 @@ namespace HomeBankingMindHub.Controllers
 
                 // Crear dos transacciones, una tipo “DEBIT” asociada a la cuenta de origen y 
                 // la otra con el tipo “CREDIT” asociada a la cuenta de destino.
+                var debitTransaction = new Transaction
+                {
+                    AccountId = fromAccount.Id,
+                    Amount = -newTransfer.Amount,
+                    Date = DateTime.Now,
+                    Description = newTransfer.Description,
+                    Type = TransactionType.DEBIT
+                };
+                //var toAccountClient = _clientRepository.FindById(ToAccount.ClientId);
+                var creditTransaction = new Transaction
+                {
+                    AccountId = toAccount.Id,
+                    Amount = newTransfer.Amount,
+                    Date = DateTime.Now,
+                    Description = newTransfer.Description,
+                    Type = TransactionType.CREDIT
+                };
+
+                _transactionRepository.Save(debitTransaction);
+                _transactionRepository.Save(creditTransaction);
 
                 // A la cuenta de origen se le restará el monto indicado en la petición
                 // y a la cuenta de destino se le sumará el mismo monto.
+                fromAccount.Balance -= newTransfer.Amount;
+                toAccount.Balance += newTransfer.Amount;
+
+                _accountRepository.Save(fromAccount);
+                _accountRepository.Save(toAccount);
 
                 return Ok(newTransfer);
             }
