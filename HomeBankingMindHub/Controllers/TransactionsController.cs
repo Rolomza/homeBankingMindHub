@@ -1,7 +1,9 @@
 ﻿using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HomeBankingMindHub.Controllers
 {
@@ -22,10 +24,60 @@ namespace HomeBankingMindHub.Controllers
         }
 
         [HttpPost]
+        [Authorize("ClientOnly")]
         public IActionResult MakeTransaction([FromBody] TransferDTO newTransfer)
         {
             try
-            {   
+            {
+                // Verificar que los parámetros no estén vacíos
+                if (newTransfer.FromAccountNumber.IsNullOrEmpty() || 
+                    newTransfer.FromAccountNumber.IsNullOrEmpty() ||
+                    newTransfer.Description.IsNullOrEmpty() ||
+                    newTransfer.Amount <= 0)
+                {
+                    return BadRequest("Campos de transacción no válidos. Complete todos los campos requeridos.");
+                }
+
+                // Verificar que los números de cuenta no sean iguales
+                if (newTransfer.FromAccountNumber.Equals(newTransfer.ToAccountNumber))
+                {
+                    return BadRequest("Transacción no válida. No puedes transferir a la misma cuenta.");
+                }
+
+                // Verificar que exista la cuenta de origen
+                var fromAccount = _accountRepository.FindByNumber(newTransfer.FromAccountNumber);
+                if(fromAccount == null)
+                {
+                    return BadRequest($"La cuenta de origen {newTransfer.FromAccountNumber} no existe.");
+                }
+
+                // Verificar que la cuenta de origen pertenezca al cliente autenticado
+                var authenticatedClient = _clientRepository.FindByEmail(User.FindFirst("Client").Value);
+                
+                if (!authenticatedClient.Accounts.Any(account => account.Number == fromAccount.Number))
+                {
+                    return BadRequest($"La cuenta {fromAccount.Number} no le pertenece.");
+                }
+
+                // Verificar que exista la cuenta de destino
+                var ToAccount = _accountRepository.FindByNumber(newTransfer.ToAccountNumber);
+                if (ToAccount == null)
+                {
+                    return BadRequest($"La cuenta de destino {newTransfer.ToAccountNumber} no existe.");
+                }
+
+                // Verificar que la cuenta de origen tenga el monto disponible.
+                if (fromAccount.Balance < newTransfer.Amount)
+                {
+                    return BadRequest("Saldo insuficiente para realizar la transacción.");
+                }
+
+                // Crear dos transacciones, una tipo “DEBIT” asociada a la cuenta de origen y 
+                // la otra con el tipo “CREDIT” asociada a la cuenta de destino.
+
+                // A la cuenta de origen se le restará el monto indicado en la petición
+                // y a la cuenta de destino se le sumará el mismo monto.
+
                 return Ok(newTransfer);
             }
             catch (Exception ex)
