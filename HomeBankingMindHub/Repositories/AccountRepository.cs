@@ -34,8 +34,16 @@ namespace HomeBankingMindHub.Repositories
 
         public void Save(Account account)
         {
-            Create(account);
+            if(account.Id == 0) 
+            {
+                Create(account);
+            } else
+            {
+                Update(account);
+            }
+            
             SaveChanges();
+            RepositoryContext.ChangeTracker.Clear();
         }
 
         public Account FindByNumber(string number)
