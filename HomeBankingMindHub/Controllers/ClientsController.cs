@@ -17,11 +17,14 @@ namespace HomeBankingMindHub.Controllers
     {
         private readonly IClientRepository _clientRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly ICardRepository _cardRepository;
 
-        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository)
+        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository
+            ICardRepository cardRepository)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
+            _cardRepository = cardRepository;
         }
 
         [HttpGet]
@@ -347,7 +350,7 @@ namespace HomeBankingMindHub.Controllers
                     ThruDate = DateTime.Now.AddYears(5),
                 };
 
-
+                _cardRepository.Save(newCard);
 
                 return StatusCode(201, $"Tarjeta Creada satisfactoriamente.");
             }
