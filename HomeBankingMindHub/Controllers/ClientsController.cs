@@ -350,12 +350,10 @@ namespace HomeBankingMindHub.Controllers
                 }
 
                 string newCardNumber;
-                newCardNumber = RandomNumberGenerator.GenerateCardNumber();
-
                 do
                 {
                     newCardNumber = RandomNumberGenerator.GenerateCardNumber();
-                } while (client.Cards.Any(card => card.Number == newCardNumber));
+                } while (_cardRepository.FindByNumber(newCardNumber) != null);
 
                 Card newCard = new Card
                 {
