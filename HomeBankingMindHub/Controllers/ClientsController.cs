@@ -6,6 +6,7 @@ using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Drawing;
 
 namespace HomeBankingMindHub.Controllers
@@ -248,8 +249,26 @@ namespace HomeBankingMindHub.Controllers
                 };
 
                 _clientRepository.Save(newClient);
-                return Created("", newClient);
 
+                var newClientAtDB = _clientRepository.FindByEmail(newClient.Email);
+
+                string newAccountNumber;
+                do
+                {
+                    newAccountNumber = RandomNumberGenerator.GenerateAccountNumber();
+                } while (_accountRepository.FindByNumber(newAccountNumber) != null);
+
+                Account newClientAccount = new Account
+                {
+                    Number = newAccountNumber,
+                    CreationDate = DateTime.Now,
+                    Balance = 0,
+                    ClientId = newClientAtDB.Id,
+                };
+
+                _accountRepository.Save(newClientAccount);
+
+                return Created("", newClient);
             }
             catch (Exception ex)
             {
