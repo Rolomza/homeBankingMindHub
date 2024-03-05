@@ -1,5 +1,6 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
+using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -113,22 +114,47 @@ namespace HomeBankingMindHub.Controllers
 
                     // Que la cuenta de destino pertenezca al Cliente autentificado.
                     var authenticatedClientEmail = User.FindFirst("Client").Value;
-                    var client = _clientRepository.FindByEmail(authenticatedClientEmail);
+                    var authenticatedClient = _clientRepository.FindByEmail(authenticatedClientEmail);
 
-                    if (client.Id != toAccount.ClientId)
+                    if (authenticatedClient.Id != toAccount.ClientId)
                     {
                         return StatusCode(403, "La cuenta de destino no es de tu propiedad");
                     }
 
                     // Cuando guardes clientLoan el monto debes multiplicarlo por el 20%.
+                    var amountPlusInterest = loanApplicationDTO.Amount * 1.20;
 
+                    var newClientLoan = new ClientLoan
+                    {
+                        Amount = amountPlusInterest,
+                        Payments = loanApplicationDTO.Payments,
+                        ClientId = toAccount.ClientId,
+                        LoanId = loanApplicationDTO.LoanId,
+                    };
+
+                    _clientLoanRepository.Save(newClientLoan);
+
+                    // Se debe crear una transacción “CREDIT” asociada a la cuenta de destino
+                    // con la descripción concatenando el nombre del préstamo y la frase “loan approved”
                     // Guardar la transaccción.
+                    var newAccountTransaction = new Models.Transaction
+                    {
+                        AccountId = toAccount.Id,
+                        Amount = loanApplicationDTO.Amount,
+                        Date = DateTime.Now,
+                        Description = $"{loan.Name} loan approved.",
+                        Type = TransactionType.CREDIT,
+                    };
+
+                    _transactionRepository.Save(newAccountTransaction);
 
                     // Actualizar el Balance de la cuenta sumando el monto del préstamo.
+                    toAccount.Balance += loanApplicationDTO.Amount;
+                    // Guardar (Actualizar) la cuenta.
+                    _accountRepository.Save(toAccount);
 
-                    // Guardar la cuenta.
                     scope.Complete();
-                    return Ok();
+                    return StatusCode(201, "Created");
                 }
                 catch (Exception ex)
                 {
