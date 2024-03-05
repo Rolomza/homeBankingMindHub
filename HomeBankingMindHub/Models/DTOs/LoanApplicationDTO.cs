@@ -2,9 +2,9 @@
 {
     public class LoanApplicationDTO
     {
-        long LoanId { get; set; }
-        double Amount { get; set; }
-        string Payments { get; set; }
-        string ToAccountNumber { get; set; }
+        public long LoanId { get; set; }
+        public double Amount { get; set; }
+        public string Payments { get; set; }
+        public string ToAccountNumber { get; set; }
     }
 }
