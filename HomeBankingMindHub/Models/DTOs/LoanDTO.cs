@@ -2,9 +2,9 @@
 {
     public class LoanDTO
     {
-        long Id { get; set; }
-        string Name { get; set; }
-        double MaxAmount { get; set; }
-        string Payments { get; set; }
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public double MaxAmount { get; set; }
+        public string Payments { get; set; }
     }
 }
