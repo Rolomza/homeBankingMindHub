@@ -12,5 +12,21 @@ namespace HomeBankingMindHub.Models.DTOs
         public int Cvv { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ThruDate { get; set; }
+
+        public CardDTO()
+        {
+        }
+
+        public CardDTO(Card card)
+        {
+            Id = card.Id;
+            CardHolder = card.CardHolder;
+            Type = card.Type.ToString();
+            Color = card.Color.ToString();
+            Number = card.Number;
+            Cvv = card.Cvv;
+            FromDate = card.FromDate;
+            ThruDate = card.ThruDate;
+        }
     }
 }

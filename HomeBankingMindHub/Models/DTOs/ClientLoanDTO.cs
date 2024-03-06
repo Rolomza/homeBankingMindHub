@@ -8,5 +8,17 @@
         public double Amount { get; set; }
         public int Payments { get; set; }
 
+        public ClientLoanDTO()
+        {
+        }
+
+        public ClientLoanDTO(ClientLoan clientLoan)
+        {
+            Id = clientLoan.Id;
+            LoanId = clientLoan.LoanId;
+            Amount = clientLoan.Amount;
+            Payments = int.Parse(clientLoan.Payments);
+            LoanId = clientLoan.Loan.Id;
+        }
     }
 }
