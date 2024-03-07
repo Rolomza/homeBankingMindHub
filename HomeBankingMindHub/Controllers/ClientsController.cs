@@ -39,43 +39,7 @@ namespace HomeBankingMindHub.Controllers
 
                 foreach (Client client in clients)
                 {
-                    var newClientDTO = new ClientDTO
-                    {
-                        Id = client.Id,
-                        Email = client.Email,
-                        FirstName = client.FirstName,
-                        LastName = client.LastName,
-                        Accounts = client.Accounts.Select(account =>
-                            new AccountDTO
-                            {
-                                Id = account.Id,
-                                Balance = account.Balance,
-                                CreationDate = account.CreationDate,
-                                Number = account.Number
-                            }).ToList(),
-                        Credits = client.ClientLoans.Select(client =>
-                            new ClientLoanDTO
-                            {
-                                Id = client.Id,
-                                LoanId = client.LoanId,
-                                Name = client.Loan.Name,
-                                Amount = client.Amount,
-                                Payments = int.Parse(client.Payments)
-                            }).ToList(),
-                        Cards = client.Cards.Select(client =>
-                            new CardDTO
-                            {
-                                Id = client.Id,
-                                CardHolder = client.CardHolder,
-                                Color = client.Color.ToString(),
-                                Cvv = client.Cvv,
-                                FromDate = client.FromDate,
-                                Number = client.Number,
-                                ThruDate = client.ThruDate,
-                                Type = client.Type.ToString()
-                            }).ToList()
-                    };
-
+                    var newClientDTO = new ClientDTO(client);
                     clientsDTO.Add(newClientDTO);
                 }
 
@@ -109,42 +73,8 @@ namespace HomeBankingMindHub.Controllers
                     }
                 }
 
-                var clientDTO = new ClientDTO
-                {
-                    Id = client.Id,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
-                    Email = client.Email,
-                    Accounts = client.Accounts.Select(account => new AccountDTO
-                    {
-                        Id = account.Id,
-                        Balance = account.Balance,
-                        CreationDate = account.CreationDate,
-                        Number = account.Number
-                    }).ToList(),
-                    Credits = client.ClientLoans.Select(client =>
-                        new ClientLoanDTO
-                        {
-                            Id = client.Id,
-                            LoanId = client.LoanId,
-                            Name = client.Loan.Name,
-                            Amount = client.Amount,
-                            Payments = int.Parse(client.Payments)
-                        }).ToList(),
-                    Cards = client.Cards.Select(client =>
-                        new CardDTO
-                        {
-                            Id = client.Id,
-                            CardHolder = client.CardHolder,
-                            Color = client.Color.ToString(),
-                            Cvv = client.Cvv,
-                            FromDate = client.FromDate,
-                            Number = client.Number,
-                            ThruDate = client.ThruDate,
-                            Type = client.Type.ToString()
-                        }).ToList()
-                };
-
+                var clientDTO = new ClientDTO(client);
+                
                 return Ok(clientDTO);
             }
             catch (Exception ex)
@@ -171,39 +101,7 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                var clientDTO = new ClientDTO
-                {
-                    Id = client.Id,
-                    Email = client.Email,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
-                    Accounts = client.Accounts.Select(account => new AccountDTO
-                    {
-                        Id = account.Id,
-                        Balance = account.Balance,
-                        CreationDate = account.CreationDate,
-                        Number = account.Number,
-                    }).ToList(),
-                    Credits = client.ClientLoans.Select(client => new ClientLoanDTO
-                    {
-                        Id = client.Id,
-                        LoanId = client.LoanId,
-                        Name = client.Loan.Name,
-                        Amount = client.Amount,
-                        Payments = int.Parse(client.Payments)
-                    }).ToList(),
-                    Cards = client.Cards.Select(card => new CardDTO
-                    {
-                        Id = card.Id,
-                        CardHolder = card.CardHolder,
-                        Color = card.Color.ToString(),
-                        Cvv = card.Cvv,
-                        FromDate = card.FromDate,
-                        Number = card.Number,
-                        ThruDate = card.ThruDate,
-                        Type = card.Type.ToString()
-                    }).ToList()
-                };
+                var clientDTO = new ClientDTO(client);
 
                 return Ok(clientDTO);
             }
@@ -395,22 +293,22 @@ namespace HomeBankingMindHub.Controllers
 
                 foreach (Account account in accounts)
                 {
-                    var newAccountDTO = new AccountDTO
-                    {
-                        Id = account.Id,
-                        Number = account.Number,
-                        CreationDate = account.CreationDate,
-                        Balance = account.Balance,
-                        Transactions = account.Transactions.Select(transaction =>
-                            new TransactionDTO
-                            {
-                                Id = transaction.Id,
-                                Type = transaction.Type.ToString(),
-                                Amount = transaction.Amount,
-                                Description = transaction.Description,
-                                Date = transaction.Date,
-                            }).ToList()
-                    };
+                    var newAccountDTO = new AccountDTO(account);
+                    //{
+                    //    Id = account.Id,
+                    //    Number = account.Number,
+                    //    CreationDate = account.CreationDate,
+                    //    Balance = account.Balance,
+                    //    Transactions = account.Transactions.Select(transaction =>
+                    //        new TransactionDTO
+                    //        {
+                    //            Id = transaction.Id,
+                    //            Type = transaction.Type.ToString(),
+                    //            Amount = transaction.Amount,
+                    //            Description = transaction.Description,
+                    //            Date = transaction.Date,
+                    //        }).ToList()
+                    //};
 
                     accountsDTO.Add(newAccountDTO);
                 }
@@ -441,17 +339,17 @@ namespace HomeBankingMindHub.Controllers
 
                 foreach (Card card in cards)
                 {
-                    var newCardDTO = new CardDTO
-                    {
-                        Id = card.Id,
-                        CardHolder = card.CardHolder,
-                        Color = card.Color.ToString(),
-                        Cvv = card.Cvv,
-                        FromDate = card.FromDate,
-                        Number = card.Number,
-                        ThruDate = card.ThruDate,
-                        Type = card.Type.ToString()
-                    };
+                    var newCardDTO = new CardDTO(card);
+                    //{
+                    //    Id = card.Id,
+                    //    CardHolder = card.CardHolder,
+                    //    Color = card.Color.ToString(),
+                    //    Cvv = card.Cvv,
+                    //    FromDate = card.FromDate,
+                    //    Number = card.Number,
+                    //    ThruDate = card.ThruDate,
+                    //    Type = card.Type.ToString()
+                    //};
 
                     cardsDTO.Add(newCardDTO);
                 }
