@@ -12,9 +12,19 @@ namespace HomeBankingMindHub.Services.Impl
         {
             _clientRepository = clientRepository;
         }
+
+        public Client getClientByEmail(string email)
+        {
+            return _clientRepository.FindByEmail(email);
+        }
+
         public ClientDTO getClientDTOByEmail(string email)
         {
-            Client client = _clientRepository.FindByEmail(email);
+            Client client = getClientByEmail(email);
+            if (client == null)
+            {
+                return null;
+            }
             return new ClientDTO(client);
         }
     }

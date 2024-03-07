@@ -2,6 +2,7 @@
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Services;
 using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,13 +20,15 @@ namespace HomeBankingMindHub.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly ICardRepository _cardRepository;
+        private readonly IClientService _clientService;
 
         public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ICardRepository cardRepository)
+            ICardRepository cardRepository, IClientService clientService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _cardRepository = cardRepository;
+            _clientService = clientService;
         }
 
         [HttpGet]
@@ -95,15 +98,14 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                Client client = _clientRepository.FindByEmail(email);
+                ClientDTO client = _clientService.getClientDTOByEmail(email);
+
                 if (client == null)
                 {
                     return Forbid();
                 }
 
-                var clientDTO = new ClientDTO(client);
-
-                return Ok(clientDTO);
+                return Ok(client);
             }
             catch (Exception ex)
             {
