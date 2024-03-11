@@ -5,7 +5,11 @@ namespace HomeBankingMindHub.Services
 {
     public interface IClientService
     {
-        Client getClientByEmail(string email);
-        ClientDTO getClientDTOByEmail(string email);
+        Client GetClientByEmail(string email);
+        Client GetClientById(long id);
+        IEnumerable<Client> GetAllClients();
+        IEnumerable<ClientDTO> GetAllClientsDTOs();
+        ClientDTO GetClientDTOByEmail(string email);
+        ClientDTO GetClientDTOById(long id);
     }
 }

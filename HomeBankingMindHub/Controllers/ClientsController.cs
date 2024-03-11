@@ -5,10 +5,7 @@ using HomeBankingMindHub.Repositories;
 using HomeBankingMindHub.Services;
 using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using System.Drawing;
 
 namespace HomeBankingMindHub.Controllers
 {
@@ -37,16 +34,9 @@ namespace HomeBankingMindHub.Controllers
         {
             try
             {
-                var clients = _clientRepository.GetAllClients();
-                var clientsDTO = new List<ClientDTO>();
-
-                foreach (Client client in clients)
-                {
-                    var newClientDTO = new ClientDTO(client);
-                    clientsDTO.Add(newClientDTO);
-                }
-
-                return Ok(clientsDTO);
+                var clients = _clientService.GetAllClientsDTOs();
+                
+                return Ok(clients);
             }
             catch (Exception ex)
             {
@@ -59,7 +49,7 @@ namespace HomeBankingMindHub.Controllers
         {
             try
             {
-                var client = _clientRepository.FindById(id);
+                ClientDTO client = _clientService.GetClientDTOById(id);
                 if (client == null)
                 {
                     return Forbid();
@@ -76,9 +66,7 @@ namespace HomeBankingMindHub.Controllers
                     }
                 }
 
-                var clientDTO = new ClientDTO(client);
-                
-                return Ok(clientDTO);
+                return Ok(client);
             }
             catch (Exception ex)
             {
@@ -98,7 +86,7 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                ClientDTO client = _clientService.getClientDTOByEmail(email);
+                ClientDTO client = _clientService.GetClientDTOByEmail(email);
 
                 if (client == null)
                 {

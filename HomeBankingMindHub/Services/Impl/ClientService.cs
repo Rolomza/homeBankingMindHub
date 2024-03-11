@@ -13,19 +13,53 @@ namespace HomeBankingMindHub.Services.Impl
             _clientRepository = clientRepository;
         }
 
-        public Client getClientByEmail(string email)
+        public Client GetClientById(long id)
+        {
+            return _clientRepository.FindById(id);
+        }
+
+        public Client GetClientByEmail(string email)
         {
             return _clientRepository.FindByEmail(email);
         }
 
-        public ClientDTO getClientDTOByEmail(string email)
+        public IEnumerable<Client> GetAllClients() 
         {
-            Client client = getClientByEmail(email);
+
+            return _clientRepository.GetAllClients();
+        }
+
+        public ClientDTO GetClientDTOById(long id)
+        {
+            Client client = GetClientById(id);
             if (client == null)
             {
                 return null;
             }
             return new ClientDTO(client);
+        }
+
+        public ClientDTO GetClientDTOByEmail(string email)
+        {
+            Client client = GetClientByEmail(email);
+            if (client == null)
+            {
+                return null;
+            }
+            return new ClientDTO(client);
+        }
+
+        public IEnumerable<ClientDTO> GetAllClientsDTOs()
+        {
+            var clients = GetAllClients();
+            var clientsDTO = new List<ClientDTO>();
+            foreach (Client client in clients)
+            {
+                var newClientDTO = new ClientDTO(client);
+                clientsDTO.Add(newClientDTO);
+            }
+
+            return clientsDTO;
         }
     }
 }
