@@ -121,42 +121,17 @@ namespace HomeBankingMindHub.Controllers
                     return StatusCode(403, "Datos Personales Incompletos.");
                 }
 
-                Client user = _clientRepository.FindByEmail(clientCreationDTO.Email);
+                Client user = _clientService.GetClientByEmail(clientCreationDTO.Email);
 
                 if (user != null)
                 {
                     return StatusCode(403, "Email está en uso.");
                 }
 
-                Client newClient = new Client
-                {
-                    Email = clientCreationDTO.Email,
-                    Password = clientCreationDTO.Password,
-                    FirstName = clientCreationDTO.FirstName,
-                    LastName = clientCreationDTO.LastName,
-                };
+                _clientService.CreateClientWithAccount(clientCreationDTO);
+                ClientDTO createdClient = _clientService.GetClientDTOByEmail(clientCreationDTO.Email);
 
-                _clientRepository.Save(newClient);
-
-                var newClientAtDB = _clientRepository.FindByEmail(newClient.Email);
-
-                string newAccountNumber;
-                do
-                {
-                    newAccountNumber = RandomNumberGenerator.GenerateAccountNumber();
-                } while (_accountRepository.FindByNumber(newAccountNumber) != null);
-
-                Account newClientAccount = new Account
-                {
-                    Number = newAccountNumber,
-                    CreationDate = DateTime.Now,
-                    Balance = 0,
-                    ClientId = newClientAtDB.Id,
-                };
-
-                _accountRepository.Save(newClientAccount);
-
-                return Created("", newClient);
+                return Created("", createdClient);
             }
             catch (Exception ex)
             {

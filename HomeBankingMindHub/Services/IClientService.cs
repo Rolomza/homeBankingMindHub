@@ -11,5 +11,6 @@ namespace HomeBankingMindHub.Services
         IEnumerable<ClientDTO> GetAllClientsDTOs();
         ClientDTO GetClientDTOByEmail(string email);
         ClientDTO GetClientDTOById(long id);
+        void CreateClientWithAccount(ClientCreationDTO clientCreationDTO);
     }
 }
