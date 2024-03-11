@@ -14,6 +14,17 @@ namespace HomeBankingMindHub.Services.Impl
             _accountRepository = accountRepository;
         }
 
+        public Account GetAccountById(long id)
+        {
+            return _accountRepository.FindById(id);
+        }
+
+        public AccountDTO GetAccountDTOById(long id)
+        {
+            Account account = GetAccountById(id);
+            return new AccountDTO(account);
+        }
+
         public IEnumerable<Account> GetAllAccounts()
         {
             return _accountRepository.GetAllAccounts();
