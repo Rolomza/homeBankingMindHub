@@ -225,33 +225,10 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                var client = _clientRepository.FindByEmail(clientEmail);
-                var accounts = _accountRepository.GetAccountsByClient(client.Id);
-                var accountsDTO = new List<AccountDTO>();
-
-                foreach (Account account in accounts)
-                {
-                    var newAccountDTO = new AccountDTO(account);
-                    //{
-                    //    Id = account.Id,
-                    //    Number = account.Number,
-                    //    CreationDate = account.CreationDate,
-                    //    Balance = account.Balance,
-                    //    Transactions = account.Transactions.Select(transaction =>
-                    //        new TransactionDTO
-                    //        {
-                    //            Id = transaction.Id,
-                    //            Type = transaction.Type.ToString(),
-                    //            Amount = transaction.Amount,
-                    //            Description = transaction.Description,
-                    //            Date = transaction.Date,
-                    //        }).ToList()
-                    //};
-
-                    accountsDTO.Add(newAccountDTO);
-                }
-
-                return Ok(accountsDTO);
+                var client = _clientService.GetClientByEmail(clientEmail);
+                var accounts = _accountService.GetAllAccountDTOsByClientId(client.Id);
+                
+                return Ok(accounts);
             }
             catch (Exception ex)
             {

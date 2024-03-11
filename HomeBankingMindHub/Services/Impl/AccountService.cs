@@ -1,4 +1,5 @@
 ﻿using HomeBankingMindHub.Models;
+using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
 using HomeBankingMindHub.Utils;
 
@@ -30,6 +31,23 @@ namespace HomeBankingMindHub.Services.Impl
             };
 
             _accountRepository.Save(newClientAccount);
+        }
+
+        public IEnumerable<Account> GetAccountsByClientId(long clientId)
+        {
+            return _accountRepository.GetAccountsByClient(clientId);
+        }
+
+        public IEnumerable<AccountDTO> GetAllAccountDTOsByClientId(long clientId)
+        {
+            var accounts = GetAccountsByClientId(clientId);
+            var accountsDTO = new List<AccountDTO>();
+            foreach (var account in accounts)
+            {
+                var newAccountDTO = new AccountDTO(account);
+                accountsDTO.Add(newAccountDTO);
+            }
+            return accountsDTO;
         }
     }
 }
