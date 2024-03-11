@@ -18,14 +18,16 @@ namespace HomeBankingMindHub.Controllers
         private readonly IAccountRepository _accountRepository;
         private readonly ICardRepository _cardRepository;
         private readonly IClientService _clientService;
+        private readonly IAccountService _accountService;
 
         public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ICardRepository cardRepository, IClientService clientService)
+            ICardRepository cardRepository, IClientService clientService, IAccountService accountService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _cardRepository = cardRepository;
             _clientService = clientService;
+            _accountService = accountService;
         }
 
         [HttpGet]
@@ -151,7 +153,7 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                var client = _clientRepository.FindByEmail(email);
+                var client = _clientService.GetClientByEmail(email);
                 
                 if (client.Accounts.ToList().Count == 3)
                 {
@@ -159,21 +161,7 @@ namespace HomeBankingMindHub.Controllers
                 } 
                 else
                 {
-                    string newAccountNumber;
-                    do
-                    {
-                        newAccountNumber = RandomNumberGenerator.GenerateAccountNumber();
-                    } while (_accountRepository.FindByNumber(newAccountNumber) != null);
-
-                    Account newAccount = new Account
-                    {
-                        ClientId = client.Id,
-                        CreationDate = DateTime.Now,
-                        Balance = 0,
-                        Number = newAccountNumber,
-                    };
-
-                    _accountRepository.Save(newAccount);
+                    _accountService.CreateAccount(client.Id);
                 }
 
                 return StatusCode(201, "Cuenta Creada satisfactoriamente.");
