@@ -25,6 +25,7 @@ builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
 // Controllers Services
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ICardService, CardService>();
 
 builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

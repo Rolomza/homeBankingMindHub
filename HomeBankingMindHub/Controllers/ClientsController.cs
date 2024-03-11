@@ -19,15 +19,18 @@ namespace HomeBankingMindHub.Controllers
         private readonly ICardRepository _cardRepository;
         private readonly IClientService _clientService;
         private readonly IAccountService _accountService;
+        private readonly ICardService _cardService;
 
         public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ICardRepository cardRepository, IClientService clientService, IAccountService accountService)
+            ICardRepository cardRepository, IClientService clientService, IAccountService accountService,
+            ICardService cardService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _cardRepository = cardRepository;
             _clientService = clientService;
             _accountService = accountService;
+            _cardService = cardService;
         }
 
         [HttpGet]
@@ -184,7 +187,7 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                var client = _clientRepository.FindByEmail(email);
+                var client = _clientService.GetClientByEmail(email);
                 var cardCreationDTOType = (CardType)Enum.Parse(typeof(CardType), cardCreationDTO.Type);
                 var cardCreationDTOColor = (CardColor)Enum.Parse(typeof(CardColor), cardCreationDTO.Color);
 
@@ -200,25 +203,7 @@ namespace HomeBankingMindHub.Controllers
                     }
                 }
 
-                string newCardNumber;
-                do
-                {
-                    newCardNumber = RandomNumberGenerator.GenerateCardNumber();
-                } while (_cardRepository.FindByNumber(newCardNumber) != null);
-
-                Card newCard = new Card
-                {
-                    ClientId = client.Id,
-                    CardHolder = client.FirstName + " " + client.LastName,
-                    Type = cardCreationDTOType,
-                    Color = cardCreationDTOColor,
-                    Number = newCardNumber,
-                    Cvv = RandomNumberGenerator.GenerateCvvNumber(),
-                    FromDate = DateTime.Now,
-                    ThruDate = DateTime.Now.AddYears(5),
-                };
-
-                _cardRepository.Save(newCard);
+                _cardService.CreateCard(client, cardCreationDTOType, cardCreationDTOColor);
 
                 return StatusCode(201, $"Tarjeta Creada satisfactoriamente.");
             }
