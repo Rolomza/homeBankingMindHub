@@ -2,6 +2,7 @@
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,22 @@ namespace HomeBankingMindHub.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly IAccountService _accountService;
+        private readonly IClientService _clientService;
+        private readonly ITransactionService _transactionService;
 
         public TransactionsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ITransactionRepository transactionRepository)
+            ITransactionRepository transactionRepository, 
+            IAccountService accountService, 
+            IClientService clientService,
+            ITransactionService transactionService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _transactionRepository = transactionRepository;
+            _accountService = accountService;
+            _clientService = clientService;
+            _transactionService = transactionService;
         }
 
         [HttpPost]
@@ -50,14 +60,14 @@ namespace HomeBankingMindHub.Controllers
                     }
 
                     // Verificar que exista la cuenta de origen
-                    var fromAccount = _accountRepository.FindByNumber(newTransfer.FromAccountNumber);
+                    var fromAccount = _accountService.GetAccountByNumber(newTransfer.FromAccountNumber);
                     if (fromAccount == null)
                     {
                         return BadRequest($"La cuenta de origen {newTransfer.FromAccountNumber} no existe.");
                     }
 
                     // Verificar que la cuenta de origen pertenezca al cliente autenticado
-                    var authenticatedClient = _clientRepository.FindByEmail(User.FindFirst("Client").Value);
+                    var authenticatedClient = _clientService.GetClientByEmail(User.FindFirst("Client").Value);
 
                     if (!authenticatedClient.Accounts.Any(account => account.Number == fromAccount.Number))
                     {
@@ -65,7 +75,7 @@ namespace HomeBankingMindHub.Controllers
                     }
 
                     // Verificar que exista la cuenta de destino
-                    var toAccount = _accountRepository.FindByNumber(newTransfer.ToAccountNumber);
+                    var toAccount = _accountService.GetAccountByNumber(newTransfer.ToAccountNumber);
                     if (toAccount == null)
                     {
                         return BadRequest($"La cuenta de destino {newTransfer.ToAccountNumber} no existe.");
@@ -77,36 +87,7 @@ namespace HomeBankingMindHub.Controllers
                         return BadRequest("Saldo insuficiente para realizar la transacción.");
                     }
 
-                    // Crear dos transacciones, una tipo “DEBIT” asociada a la cuenta de origen y 
-                    // la otra con el tipo “CREDIT” asociada a la cuenta de destino.
-                    var debitTransaction = new Models.Transaction
-                    {
-                        AccountId = fromAccount.Id,
-                        Amount = -newTransfer.Amount,
-                        Date = DateTime.Now,
-                        Description = newTransfer.Description,
-                        Type = TransactionType.DEBIT
-                    };
-                    //var toAccountClient = _clientRepository.FindById(ToAccount.ClientId);
-                    var creditTransaction = new Models.Transaction
-                    {
-                        AccountId = toAccount.Id,
-                        Amount = newTransfer.Amount,
-                        Date = DateTime.Now,
-                        Description = newTransfer.Description,
-                        Type = TransactionType.CREDIT
-                    };
-
-                    _transactionRepository.Save(debitTransaction);
-                    _transactionRepository.Save(creditTransaction);
-
-                    // A la cuenta de origen se le restará el monto indicado en la petición
-                    // y a la cuenta de destino se le sumará el mismo monto.
-                    fromAccount.Balance -= newTransfer.Amount;
-                    toAccount.Balance += newTransfer.Amount;
-
-                    _accountRepository.Save(fromAccount);
-                    _accountRepository.Save(toAccount);
+                    _transactionService.CreateTransaction(fromAccount, toAccount, newTransfer);
 
                     scope.Complete();
                     return Ok(newTransfer);
