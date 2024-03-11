@@ -1,4 +1,5 @@
 ﻿using HomeBankingMindHub.Models;
+using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
 using HomeBankingMindHub.Utils;
@@ -12,6 +13,23 @@ namespace HomeBankingMindHub.Services.Impl
         public CardService(ICardRepository cardRepository)
         {
             _cardRepository = cardRepository;
+        }
+
+        public IEnumerable<Card> GetCardsByClientId(long clientId) 
+        {
+            return _cardRepository.GetCardsByClient(clientId);
+        }
+
+        public IEnumerable<CardDTO> GetCardDTOsByClientId(long clientId)
+        {
+            var cards = _cardRepository.GetCardsByClient(clientId);
+            var cardDTOs = new List<CardDTO>();
+            foreach (var card in cards)
+            {
+                CardDTO cardDTO = new CardDTO(card);
+                cardDTOs.Add(cardDTO);
+            }
+            return cardDTOs;
         }
 
         public void CreateCard(Client client, CardType cardType, CardColor cardColor)

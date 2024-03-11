@@ -1,9 +1,7 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Models.Enums;
-using HomeBankingMindHub.Repositories;
 using HomeBankingMindHub.Services;
-using HomeBankingMindHub.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,20 +12,15 @@ namespace HomeBankingMindHub.Controllers
     [Route("api/[controller]")]
     public class ClientsController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
-        private readonly IAccountRepository _accountRepository;
-        private readonly ICardRepository _cardRepository;
         private readonly IClientService _clientService;
         private readonly IAccountService _accountService;
         private readonly ICardService _cardService;
 
-        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ICardRepository cardRepository, IClientService clientService, IAccountService accountService,
+        public ClientsController(
+            IClientService clientService, 
+            IAccountService accountService,
             ICardService cardService)
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _cardRepository = cardRepository;
             _clientService = clientService;
             _accountService = accountService;
             _cardService = cardService;
@@ -248,28 +241,10 @@ namespace HomeBankingMindHub.Controllers
                     return Forbid();
                 }
 
-                var client = _clientRepository.FindByEmail(clientEmail);
-                var cards = _cardRepository.GetCardsByClient(client.Id);
-                var cardsDTO = new List<CardDTO>();
-
-                foreach (Card card in cards)
-                {
-                    var newCardDTO = new CardDTO(card);
-                    //{
-                    //    Id = card.Id,
-                    //    CardHolder = card.CardHolder,
-                    //    Color = card.Color.ToString(),
-                    //    Cvv = card.Cvv,
-                    //    FromDate = card.FromDate,
-                    //    Number = card.Number,
-                    //    ThruDate = card.ThruDate,
-                    //    Type = card.Type.ToString()
-                    //};
-
-                    cardsDTO.Add(newCardDTO);
-                }
-
-                return Ok(cardsDTO);
+                var client = _clientService.GetClientByEmail(clientEmail);
+                var cardDTOs = _cardService.GetCardDTOsByClientId(client.Id);
+                
+                return Ok(cardDTOs);
             }
             catch (Exception ex)
             {
