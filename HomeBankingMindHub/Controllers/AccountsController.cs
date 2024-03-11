@@ -1,6 +1,7 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
@@ -12,10 +13,12 @@ namespace HomeBankingMindHub.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountRepository _accountRepository;
+        private readonly IAccountService _accountService;
 
-        public AccountsController(IAccountRepository accountRepository)
+        public AccountsController(IAccountRepository accountRepository, IAccountService accountService)
         {
             _accountRepository = accountRepository;
+            _accountService = accountService;
         }
 
         [HttpGet]
@@ -24,32 +27,8 @@ namespace HomeBankingMindHub.Controllers
         {
             try
             {
-                var accounts = _accountRepository.GetAllAccounts();
-                var accountsDTO = new List<AccountDTO>();
-
-                foreach (Account account in accounts)
-                {
-                    var newAccountDTO = new AccountDTO
-                    {
-                        Id = account.Id,
-                        Number = account.Number,
-                        CreationDate = account.CreationDate,
-                        Balance = account.Balance,
-                        Transactions = account.Transactions.Select(transaction =>
-                            new TransactionDTO
-                            {
-                                Id = transaction.Id,
-                                Type = transaction.Type.ToString(),
-                                Amount = transaction.Amount,
-                                Description = transaction.Description,
-                                Date = transaction.Date,
-                            }).ToList()
-                    };
-
-                    accountsDTO.Add(newAccountDTO);
-                }
-
-                return Ok(accountsDTO);
+                var accountDTOs = _accountService.GetAllAccountDTOs();
+                return Ok(accountDTOs);
             }
             catch (Exception ex)
             {

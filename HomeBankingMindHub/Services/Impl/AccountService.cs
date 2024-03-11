@@ -14,6 +14,23 @@ namespace HomeBankingMindHub.Services.Impl
             _accountRepository = accountRepository;
         }
 
+        public IEnumerable<Account> GetAllAccounts()
+        {
+            return _accountRepository.GetAllAccounts();
+        }
+
+        public IEnumerable<AccountDTO> GetAllAccountDTOs()
+        {
+            var accounts = GetAllAccounts();
+            var accountDTOs = new List<AccountDTO>();
+            foreach (var account in accounts)
+            {
+                AccountDTO accountDTO = new AccountDTO(account);
+                accountDTOs.Add(accountDTO);
+            }
+            return accountDTOs;
+        }
+
         public void CreateAccount(long clientId)
         {
             string newAccountNumber;
