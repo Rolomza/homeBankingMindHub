@@ -16,6 +16,7 @@
         {
             Id = clientLoan.Id;
             LoanId = clientLoan.LoanId;
+            Name = clientLoan.Loan.Name;
             Amount = clientLoan.Amount;
             Payments = int.Parse(clientLoan.Payments);
             LoanId = clientLoan.Loan.Id;
