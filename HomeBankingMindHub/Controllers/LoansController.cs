@@ -15,23 +15,18 @@ namespace HomeBankingMindHub.Controllers
     [ApiController]
     public class LoansController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
-        private readonly IAccountRepository _accountRepository;
-        private readonly ILoanRepository _loanRepository;
-        private readonly IClientLoanRepository _clientLoanRepository;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly ILoanService _loanService;
+        private readonly IAccountService _accountService;
+        private readonly IClientService _clientService;
 
-        public LoansController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ILoanRepository loanRepository, IClientLoanRepository clientLoanRepository, 
-            ITransactionRepository transactionRepository, ILoanService loanService)
+        public LoansController(
+            ILoanService loanService, 
+            IAccountService accountService, 
+            IClientService clientService)
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _loanRepository = loanRepository;
-            _clientLoanRepository = clientLoanRepository;
-            _transactionRepository = transactionRepository;
             _loanService = loanService;
+            _accountService = accountService;
+            _clientService = clientService;
         }
 
         [HttpGet]
@@ -58,7 +53,7 @@ namespace HomeBankingMindHub.Controllers
                 try
                 {
                     // Verificar que el préstamo exista
-                    var loan = _loanRepository.FindById(loanApplicationDTO.LoanId);
+                    var loan = _loanService.GetLoanById(loanApplicationDTO.LoanId);
                     if (loan == null)
                     {
                         return StatusCode(403, "El tipo de prestamo solicitado no existe. Revisar LoanId");
@@ -78,15 +73,7 @@ namespace HomeBankingMindHub.Controllers
 
                     // Verifica que la cantidad de cuotas se encuentre entre las disponibles del préstamo
                     string[] availablePayments = loan.Payments.Split(',');
-                    bool validPayment = false;
-
-                    foreach (var item in availablePayments)
-                    {
-                        if (item == loanApplicationDTO.Payments)
-                        {
-                            validPayment = true;
-                        }
-                    }
+                    bool validPayment = _loanService.IsValidPayment(loanApplicationDTO, availablePayments);
 
                     if (!validPayment)
                     {
@@ -94,7 +81,7 @@ namespace HomeBankingMindHub.Controllers
                     }
 
                     // Que exista la cuenta de destino.
-                    var toAccount = _accountRepository.FindByNumber(loanApplicationDTO.ToAccountNumber);
+                    var toAccount = _accountService.GetAccountByNumber(loanApplicationDTO.ToAccountNumber);
                     if (toAccount == null)
                     {
                         return StatusCode(403, "Cuenta de destino inexistente.");
@@ -102,44 +89,14 @@ namespace HomeBankingMindHub.Controllers
 
                     // Que la cuenta de destino pertenezca al Cliente autentificado.
                     var authenticatedClientEmail = User.FindFirst("Client").Value;
-                    var authenticatedClient = _clientRepository.FindByEmail(authenticatedClientEmail);
+                    var authenticatedClient = _clientService.GetClientByEmail(authenticatedClientEmail);
 
                     if (authenticatedClient.Id != toAccount.ClientId)
                     {
                         return StatusCode(403, "La cuenta de destino no es de tu propiedad");
                     }
 
-                    // Cuando guardes clientLoan el monto debes multiplicarlo por el 20%.
-                    var amountPlusInterest = loanApplicationDTO.Amount * 1.20;
-
-                    var newClientLoan = new ClientLoan
-                    {
-                        Amount = amountPlusInterest,
-                        Payments = loanApplicationDTO.Payments,
-                        ClientId = toAccount.ClientId,
-                        LoanId = loanApplicationDTO.LoanId,
-                    };
-
-                    _clientLoanRepository.Save(newClientLoan);
-
-                    // Se debe crear una transacción “CREDIT” asociada a la cuenta de destino
-                    // con la descripción concatenando el nombre del préstamo y la frase “loan approved”
-                    // Guardar la transaccción.
-                    var newAccountTransaction = new Models.Transaction
-                    {
-                        AccountId = toAccount.Id,
-                        Amount = loanApplicationDTO.Amount,
-                        Date = DateTime.Now,
-                        Description = $"{loan.Name} loan approved.",
-                        Type = TransactionType.CREDIT,
-                    };
-
-                    _transactionRepository.Save(newAccountTransaction);
-
-                    // Actualizar el Balance de la cuenta sumando el monto del préstamo.
-                    toAccount.Balance += loanApplicationDTO.Amount;
-                    // Guardar (Actualizar) la cuenta.
-                    _accountRepository.Save(toAccount);
+                    _loanService.AssingLoanToAccount(loanApplicationDTO, toAccount);
 
                     scope.Complete();
                     return StatusCode(201, "Created");

@@ -7,5 +7,6 @@ namespace HomeBankingMindHub.Services
     public interface ITransactionService
     {
         void CreateTransaction(Account fromAccount, Account toAccount, TransferDTO transferDTO);
+        void CreateLoanTransaction(Account destinationAccount, LoanApplicationDTO loanApplicationDTO, string loanName);
     }
 }
