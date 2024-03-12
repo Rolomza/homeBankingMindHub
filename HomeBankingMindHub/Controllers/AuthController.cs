@@ -1,6 +1,7 @@
 ﻿using HomeBankingMindHub.Models;
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -12,39 +13,27 @@ namespace HomeBankingMindHub.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
+        private readonly IAuthService _authService;
+        private readonly IClientService _clientService;
 
-        public AuthController(IClientRepository clientRepository)
+        public AuthController(IAuthService authService, IClientService clientService)
         {
-            _clientRepository = clientRepository;
+            _authService = authService;
+            _clientService = clientService;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] ClientLoginDTO client)
+        public async Task<IActionResult> Login([FromBody] ClientLoginDTO clientLoginDTO)
         {
             try
             {
-                Client user = _clientRepository.FindByEmail(client.Email);
-                if (user == null || !String.Equals(user.Password, client.Password))
+                Client user = _clientService.GetClientByEmail(clientLoginDTO.Email);
+                if (user == null || !String.Equals(user.Password, clientLoginDTO.Password))
                 {
                     return Unauthorized();
                 }
 
-                // Creación de claims (Datos del usuario a autenticar)
-                var claims = new List<Claim>();
-                if (user.Email.Equals("admin@gmail.com"))
-                {
-                    claims.Add(new Claim("Admin", user.Email));
-                } else
-                {
-                    claims.Add(new Claim("Client", user.Email));
-                }
-
-                // Creación del objeto que contendrá la info del usuario y el metodo de autenticacion.
-                var claimsIdentity = new ClaimsIdentity(
-                    claims,
-                    CookieAuthenticationDefaults.AuthenticationScheme
-                    );
+                var claimsIdentity = _authService.AuthenticateUser(user);
 
                 // Autenticar al usuario en la app
                 await HttpContext.SignInAsync(
