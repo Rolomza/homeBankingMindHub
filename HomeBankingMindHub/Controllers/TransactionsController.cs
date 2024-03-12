@@ -15,22 +15,15 @@ namespace HomeBankingMindHub.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
-        private readonly IAccountRepository _accountRepository;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly IAccountService _accountService;
         private readonly IClientService _clientService;
         private readonly ITransactionService _transactionService;
 
-        public TransactionsController(IClientRepository clientRepository, IAccountRepository accountRepository,
-            ITransactionRepository transactionRepository, 
+        public TransactionsController( 
             IAccountService accountService, 
             IClientService clientService,
             ITransactionService transactionService)
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _transactionRepository = transactionRepository;
             _accountService = accountService;
             _clientService = clientService;
             _transactionService = transactionService;
