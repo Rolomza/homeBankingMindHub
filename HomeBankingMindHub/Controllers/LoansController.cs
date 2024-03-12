@@ -2,6 +2,7 @@
 using HomeBankingMindHub.Models.DTOs;
 using HomeBankingMindHub.Models.Enums;
 using HomeBankingMindHub.Repositories;
+using HomeBankingMindHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +20,18 @@ namespace HomeBankingMindHub.Controllers
         private readonly ILoanRepository _loanRepository;
         private readonly IClientLoanRepository _clientLoanRepository;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly ILoanService _loanService;
 
         public LoansController(IClientRepository clientRepository, IAccountRepository accountRepository,
             ILoanRepository loanRepository, IClientLoanRepository clientLoanRepository, 
-            ITransactionRepository transactionRepository)
+            ITransactionRepository transactionRepository, ILoanService loanService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _loanRepository = loanRepository;
             _clientLoanRepository = clientLoanRepository;
             _transactionRepository = transactionRepository;
+            _loanService = loanService;
         }
 
         [HttpGet]
@@ -37,23 +40,8 @@ namespace HomeBankingMindHub.Controllers
         {
             try
             {
-                var loans = _loanRepository.GetAll();
-                var loansDTO = new List<LoanDTO>();
-
-                foreach (Loan loan in loans)
-                {
-                    var newLoanDTO = new LoanDTO
-                    {
-                        Id = loan.Id,
-                        Name = loan.Name,
-                        MaxAmount = loan.MaxAmount,
-                        Payments = loan.Payments,
-                    };
-
-                    loansDTO.Add(newLoanDTO);
-                }
-
-                return Ok(loansDTO);
+                var loanDTOs = _loanService.GetAllLoanDTOs();
+                return Ok(loanDTOs);
             }
             catch (Exception ex)
             {
